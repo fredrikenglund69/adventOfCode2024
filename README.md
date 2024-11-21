@@ -1,2 +1,2 @@
-Repos för AoC 2024. 
-Kopplat till Visual Studio Code med SAS plug-in.
+Repos for AoC 2024. 
+Feel free to copy code and give feedback :)
