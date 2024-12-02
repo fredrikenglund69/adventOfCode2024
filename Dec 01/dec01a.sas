@@ -1,35 +1,51 @@
-data ds_kola(keep=kola) ds_kolb(keep=kolb);
+/* Read data, split in two datasets */
+data ds_cola(keep=cola) ds_colb(keep=colb);
  infile '/opt/sas/lagring/Lev4/it/adventofcode2024/kfen01/in_dec01.txt' delimiter=' ';
- length kola kolb 8; 
+ length cola colb 8; 
 
- input kola kolb;
- output;
+ input cola colb;
 run;
 
-proc sort data=ds_kola;
-    by kola;
+/* sort in ascending order */
+proc sort data=ds_cola;
+    by cola;
 run;
-proc sort data=ds_kolb;
-    by kolb;
+proc sort data=ds_colb;
+    by colb;
 run;
 
+/* Add key used in join */
+data ds_cola;
+     set ds_cola;
+     length key 8;
+     key = _n_;
+run;
+
+data ds_colb;
+     set ds_colb;
+     length key 8;
+     key = _n_;
+run;
+
+/* append columns in one dataset */
 proc sql;
     create table kol as
-    select kola, kolb
-    from ds_kola
+    select cola, colb
+    from ds_cola a
     inner join
-    ds_kolb
-    on 1=1
+    ds_colb b
+    on a.key=b.key
     ;
 quit;
 
 data diff;
      set kol;
      length diff 8;
-     diff = abs(kola - kolb);
+     diff = abs(cola - colb);
 run;
 
 proc summary data=diff nway missing;
     var diff;
     output out=tot sum=;
 quit;
+
