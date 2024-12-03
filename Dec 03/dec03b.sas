@@ -1,10 +1,12 @@
-/* Read data, check length to be sure to get all */
+/* Read data, append to one line */
 data indata;
- infile '/opt/sas/lagring/Lev4/it/adventofcode2024/kfen01/in_dec03_testb.txt' delimiter='q';
- length ll 8 row $30000; 
+ infile '/opt/sas/lagring/Lev4/it/adventofcode2024/kfen01/in_dec03.txt' delimiter='q' end=_last;
+ length tmp $4000 row $30000; 
+ retain row;
 
- input row;
- ll = length(row);
+ input tmp ;
+ row = cats(row,tmp);
+ if _last then output;
 run;
 
 /* trim data, remove all between do and dont */
@@ -16,8 +18,9 @@ data trim;
      /* we start with read enabled */
      if _n_ = 1 then do;
         doread = 1;
-        prev_pos = 1;
      end;
+
+     prev_pos = 1; /* for each row we start at the beginning */
 
      /* regex fro the 3 different search mul, do and dont */
      rid_do = prxparse("/do\(\)/");
@@ -44,7 +47,7 @@ data trim;
          call prxnext(rid_act, start, stop, row, pos, len);
 
          /* last instruction, since do while exits before substr */
-         if pos = 0 then do;
+         if pos = 0 and doread = 1 then do;
             trim=substr(row,prev_pos,(pos - prev_pos));
             output;
          end;
@@ -83,5 +86,6 @@ proc print data=tot;
 run;
 
 /*
-
+100314593 to high
+99532691 correct
 */
