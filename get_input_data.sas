@@ -8,5 +8,5 @@ url="https://adventofcode.com/2024/day/&dag/input"
 method="get"
 out=output;    
 headers 
-    
+;    
 run;
