@@ -3,7 +3,7 @@
 data indata;
  length row $200 i cnt x y 8 word $4 part $1;
  array grid{&gridsize.,&gridsize.} $1 ;
- infile '/opt/sas/lagring/Lev4/it/adventofcode2024/kfen01/in_dec04.txt' delimiter='';
+ infile _infile delimiter='';
  retain grid;
 
  input row;

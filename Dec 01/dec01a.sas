@@ -1,6 +1,6 @@
 /* Read data, split in two datasets */
 data ds_cola(keep=cola) ds_colb(keep=colb);
- infile '/opt/sas/lagring/Lev4/it/adventofcode2024/kfen01/in_dec01.txt' delimiter=' ';
+ infile _infile delimiter=' ';
  length cola colb 8; 
 
  input cola colb;

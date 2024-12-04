@@ -1,6 +1,6 @@
 /* Read data */
 data indata;
- infile '/opt/sas/lagring/Lev4/it/adventofcode2024/kfen01/in_dec02_test.txt' delimiter=',';
+ infile _infile delimiter=',';
  length row $200; 
 
  input row;

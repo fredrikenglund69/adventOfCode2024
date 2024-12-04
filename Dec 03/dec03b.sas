@@ -1,6 +1,6 @@
 /* Read data, append to one line */
 data indata;
- infile '/opt/sas/lagring/Lev4/it/adventofcode2024/kfen01/in_dec03.txt' delimiter='q' end=_last;
+ infile _infile delimiter='q' end=_last;
  length tmp $4000 row $30000; 
  retain row;
 
