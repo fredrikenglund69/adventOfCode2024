@@ -22,8 +22,6 @@
 
 		i + 1;
 	end;
-
-	*put currdoc= valid= rule= i= &in=;
 %mend;
 
 data indata;
@@ -42,54 +40,51 @@ data indata;
  /* if rows contain docs, check if valid and then find middle no */
  if findc(row,',') then do;
  	%validate(in=row);
-	s = 0;
-	row2 = row;
-	rowtmp = '';
+	if valid = 0 then do;
+		s = 0;
+		row2 = row;
+		rowtmp = '';
 
-	do until(valid = 1 or s > 100);
-		/* rearrange if not valid, place wrong doc after current doc */
-		if valid = 0 then do;
-			/* first to wrong doc */
-			do q = 1 to a - 1;
-				rowtmp = cats(rowtmp,scan(row2,q),',');
-				put rowtmp=;
+		do until(valid = 1 or s > 10000);
+			/* rearrange if not valid, place wrong doc after current doc */
+			if valid = 0 then do;
+				/* first to wrong doc */
+				do q = 1 to a - 1;
+					rowtmp = cats(rowtmp,scan(row2,q),',');
+				end;
+
+				/* then to current doc */
+				do q = a + 1 to i;
+					rowtmp = cats(rowtmp,scan(row2,q),',');
+				end;
+
+				/* then add wrong after current */
+				rowtmp = cats(rowtmp,scan(row2,a),',');
+
+				/* then the rest */
+				l = i + 1;
+				do while(scan(row2,l) ne '');
+					rowtmp = cats(rowtmp,scan(row2,l),',');
+
+					l + 1;
+				end;
 			end;
 
-			/* then to current doc */
-			do q = a + 1 to i;
-				rowtmp = cats(rowtmp,scan(row2,q),',');
-				put rowtmp=;
-			end;
+			%validate(in=rowtmp);
+			row2 = rowtmp;
+			rowtmp = '';
+			s + 1;
 
-			/* then add wrong after current */
-			rowtmp = cats(rowtmp,scan(row2,a),',');
-				put rowtmp=;
-
-			/* then the rest */
-			l = i + 1;
-			do while(scan(row2,l) ne '');
-				rowtmp = cats(rowtmp,scan(row2,l),',');
-				put rowtmp=;
-
-			l + 1;
-			end;
 		end;
 
-		%validate(in=rowtmp);
-		row2 = rowtmp;
-		rowtmp = '';
-		s + 1;
-		put row2= a= i=;
+		/* if row is valid pick middle number */
+		if valid then do;
+			middoc = input(scan(row2,i/2),8.);
+			midsum = sum(midsum,middoc);
+		end;
 
+		output;
 	end;
-
-	/* if row is valid pick middle number */
-	if valid then do;
-		middoc = input(scan(row2,i/2),8.);
-		midsum = sum(midsum,middoc);
-	end;
-
-	output;
  end;
 
 run;
