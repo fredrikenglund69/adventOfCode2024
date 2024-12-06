@@ -6,10 +6,10 @@
 /* D-L : 3 */
 /* L-U : 4 */
 
-%let gridsize = 10;
+%let gridsize = 130;
 
 data indata(drop=grid: visited:);
- length row $200 currposx currposy nosteps exit i noblocks 8 dir $1;
+ length row $200 currposx currposy nosteps exit i noblocks startposx startposy x1 y1 8 dir $1;
  infile _infile delimiter='' end=_last;
 
  array grid{&gridsize.,&gridsize.} $1;
@@ -30,131 +30,125 @@ data indata(drop=grid: visited:);
  if _last then do;
  	nosteps = 1; /* start counts */
 	noblocks = 0;
-	dir = 'U';
-	exit = 0;
-	output; /* startpos */
+	startposx = currposx;
+	startposy = currposy;
 
-	do until(exit);
-		if visited(currposx,currposy) = '' then visited(currposx,currposy) = dir; 
-		select(dir);
-			when ('U') do;
-				if currposy > 1 then do;
-					if grid(currposx,currposy - 1) = '#' then do;
-						dir = 'R';
-						visited(currposx,currposy) = '1'; 
-					end;
-					else do;
-						*if visited(currposx,currposy - 1) = 'R' then noblocks + 1; 
+	do y1 = 1 to &gridsize.;
+		do x1 = 1 to &gridsize.;
+		output;
+			dir = 'U';
+			exit = 0;
+			currposx = startposx;
+			currposy = startposy;
+			nosteps = 0;
 
-						do q = currposx to &gridsize.;
-							if visited(q,currposy - 1) ne '' then do;
-								if visited(q,currposy - 1) in('R','4') then do;
-									noblocks + 1;
-									leave;
+			/* empty grid */
+			 do y = 1 to &gridsize.;
+			 	do x = 1 to &gridsize.;
+				  visited{x,y} = '';
+				end;
+			 end;
+
+
+			if grid(x1,y1) = '.' then do;
+				grid(x1,y1) = '#';
+
+				do until(exit or nosteps >20000);
+					if visited(currposx,currposy) = '' then visited(currposx,currposy) = dir; 
+					select(dir);
+						when ('U') do;
+							if currposy > 1 then do;
+								if grid(currposx,currposy - 1) = '#' then do;
+									dir = 'R';
+									visited(currposx,currposy) = 'R'; 
+								end;
+								else do;
+									if visited(currposx,currposy - 1) = dir then do;
+										noblocks + 1; 
+										exit = 2;
+									end;
+									else do;
+										currposy = currposy - 1;
+										nosteps + 1;
+									end;
 								end;
 							end;
+							else exit = 1;
 						end;
 
-						currposy = currposy - 1;
-						nosteps + 1;
-						output; /* store coordinates */
-					end;
-				end;
-				else exit = 1;
-			end;
-
-			when ('D') do;
-				if currposy < &gridsize. then do;
-					if grid(currposx,currposy + 1) = '#' then do;
-						dir = 'L';
-						visited(currposx,currposy) = '3';
-					end;
-					else do;
-						*if visited(currposx,currposy + 1) = 'L' then noblocks + 1; 
-
-						do q = currposx to 1 by -1;
-							if visited(q,currposy + 1) ne '' then do;
-								if visited(q,currposy + 1) in('L','2') then do;
-									noblocks + 1;
-									leave;
+						when ('D') do;
+							if currposy < &gridsize. then do;
+								if grid(currposx,currposy + 1) = '#' then do;
+									dir = 'L';
+									visited(currposx,currposy) = 'L';
+								end;
+								else do;
+									if visited(currposx,currposy + 1) = dir then do;
+										noblocks + 1; 
+										exit = 3;
+									end;
+									else do;
+										currposy + 1;
+										nosteps + 1;
+									end;
 								end;
 							end;
+							else exit = 1;
 						end;
 
-						currposy + 1;
-						nosteps + 1;
-						output; /* store coordinates */
-					end;
-				end;
-				else exit = 1;
-			end;
-
-			when ('R') do;
-				if currposx < &gridsize. then do;
-					if grid(currposx + 1,currposy) = '#' then do;
-						dir = 'D';
-						visited(currposx,currposy) = '2';
-					end;
-					else do;
-						*if visited(currposx + 1,currposy) = 'D' then noblocks + 1; 
-
-						do q = currposy to &gridsize.;
-							if visited(currposx + 1, q) ne '' then do;
-								if visited(currposx + 1, q) in ('D','1') then do;
-									noblocks + 1;
-									leave;
+						when ('R') do;
+							if currposx < &gridsize. then do;
+								if grid(currposx + 1,currposy) = '#' then do;
+									dir = 'D';
+									visited(currposx,currposy) = 'D';
+								end;
+								else do;
+									if visited(currposx + 1,currposy) = dir then do;
+										noblocks + 1; 
+										exit = 4;
+									end;
+									else do;
+										currposx + 1;
+										nosteps + 1;
+									end;
 								end;
 							end;
+							else exit = 1;
 						end;
 
-						currposx + 1;
-						nosteps + 1;
-						output; /* store coordinates */
-					end;
-				end;
-				else exit = 1;
-			end;
-
-			when ('L') do;
-				if currposx > 1 then do;
-					if grid(currposx - 1,currposy) = '#' then do;
-						dir = 'U';
-						visited(currposx,currposy) = '4';
-					end;
-					else do;
-						*if visited(currposx - 1,currposy) = 'U' then noblocks + 1; 
-
-						do q = currposy to 1 by -1;
-							if visited(currposx - 1, q) ne '' then do;
-								if visited(currposx - 1, q) in('U','3') then do;
-									noblocks + 1;
-									leave;
+						when ('L') do;
+							if currposx > 1 then do;
+								if grid(currposx - 1,currposy) = '#' then do;
+									dir = 'U';
+									visited(currposx,currposy) = 'U';
+								end;
+								else do;
+									if visited(currposx - 1,currposy) = dir then do;
+										noblocks + 1; 
+										exit = 5;
+									end;
+									else do;
+										currposx = currposx - 1;
+										nosteps + 1;
+									end;
 								end;
 							end;
+							else exit = 1;
 						end;
 
-						currposx = currposx - 1;
-						nosteps + 1;
-						output; /* store coordinates */
+						otherwise;
+
 					end;
+					*put currposx= currposy= dir= exit= noblocks=;
 				end;
-				else exit = 1;
+
+				grid(x1,y1) = '.';
+
 			end;
-
-			otherwise;
-
 		end;
 	end;
-	
  end;
-
- /* print grid */
- do y = 1 to &gridsize.;
- 	do x = 1 to &gridsize.;
-	  put visited{x,y} @;
-	end;
-	put ' ';
- end;
+put noblocks=;
 
 run;
 
@@ -176,4 +170,6 @@ run;
 1008 - wrong
 1007 - wrong
 1006 - wrong
+1710 - wrong
+1711 - correct
 */
