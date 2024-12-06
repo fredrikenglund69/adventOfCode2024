@@ -1,4 +1,4 @@
-%let gridsize = 10;
+%let gridsize = 140;
 
 data indata;
  length row $200 currposx currposy nosteps exit i 8 dir $1;
