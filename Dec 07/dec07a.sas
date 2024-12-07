@@ -1,4 +1,4 @@
-%let numssize = 10;
+%let numssize = 30;
 
 data indata;
  length row $200 i a q nocomb range calc 8 sign $1 formel $200;
@@ -11,7 +11,7 @@ data indata;
  /* read nums into array */
  i = 1;
  do until(scan(row,i,': ') = '');
-	nums{i} = input(scan(row,i,': '),8.);
+	nums{i} = input(scan(row,i,': '),best.);
 	i + 1;
  end;
 
@@ -37,9 +37,19 @@ data indata;
 	if calc = nums(1) then output;
  end;
 
-
 run;
 
 proc sort data=indata out=sorted nodupkey;
  by row;
 run;
+
+proc summary data=sorted nway missing;
+ var calc;
+ output out=tot sum=;
+run;
+
+/*
+346 - to low , not sum just no rows!
+434 - to low , not sum just no rows!
+663613490587
+*/
