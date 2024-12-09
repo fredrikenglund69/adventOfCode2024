@@ -40,12 +40,14 @@ data indata;
 run;
 
 
-/* create combinations with || */
-data more;
+/* create combinations with || ie # */
+data more(drop=nums:);
  length newformel $200;
  set indata;
  array nums{&numssize.} 8 ;
-
+ /* output existing rows*/;
+ newformel = formel;
+ output;
  /* create combinations */
  nocomb = nocomb - 1; /*2**(i-4);*/
  do a = 1 to nocomb;
@@ -74,75 +76,37 @@ run;
 /* calc newformel */
 data calc;
  set more;
- calc = scan(newformel,1);
+ length calc1 sum 8.;
+ format calc1 15.;
+ sum = input(scan(row,1,':'),best15.);
+ calc1 = input(scan(newformel,1,'#+*'),best15.);
  i = 2;
-
- do while(scan(newformel,i) ne '');
- 	if scan(newformel,i-1,'1234567890') = '+' then calc = sum(calc,input(scan(newformel,i),best.));
- 	if scan(newformel,i-1,'1234567890') = '*' then calc = calc * input(scan(newformel,i),best.);
+ do while(scan(newformel,i,'#*+') ne '');
+ 	if scan(newformel,i-1,'1234567890') = '+' then calc1 = sum(calc1,input(scan(newformel,i,'#*+'),best15.));
+ 	if scan(newformel,i-1,'1234567890') = '*' then calc1 = calc1 * input(scan(newformel,i,'#*+'),best15.);
+ 	if scan(newformel,i-1,'1234567890') = '#' then calc1 = input(cats(put(calc1,best15.), scan(newformel,i,'#*+')),best15.);
  	i + 1;
  end;
 
- if calc = nums1 then output;
+ if calc1 = sum then output;
 run;
 
-data newindata;
- set more;
- array nums{&numssize.} 8 ;
-
-	/* empty array and fill with new combinations */
-	do q = 2 to &numssize.;
-		nums(q) = .;
-	end;
-
-	i = 1;
-	do until(scan(formel,i,'#') = '');
-		nums{i+1} = input(scan(formel,i,'#'),best.);
-		i + 1;
-	end;
-	i + 1; /* since formula not contains total sum */
-run;
-
-
-data allcomb;
- set newindata;
- array nums{&numssize.} 8 ;
-
- /* create combinations */
- i = 1;
- do until (nums(i) eq .);
- 	i + 1;
- end;
-
- nocomb = 2**(i-1);
- do a = 1 to nocomb;
- 	formel = '';
-
- 	do q = 2 to (i-1);
-		if q < (i-1) then do; /* not last nums */
-			sign='*';
-			do range = 1 to nocomb by 2**(q-1);
-			 if range <= a < (range + 2**(q-2)) then sign = '+';
-			end;
-		end;
-		if q = (i-1) then sign = '';
-		formel = cats(formel,nums(q), sign);
-		if q = 2 then calc = nums(q);
-		if sign = '+' then calc = sum(calc,nums(q+1));
-		if sign = '*' then calc = calc * nums(q+1);
-	end;
-
-	if calc = nums(1) then output;
- end;
-
-run;
-
-proc sort data=allcomb out=sorted nodupkey;
+proc sort data=calc out=sorted nodupkey;
  by row;
 run;
 
+
 proc summary data=sorted nway missing;
- var calc;
+ var calc1;
  output out=tot sum=;
 run;
+
+/*
+663613490587 - correct on task a
+
+675856833361 - to low 
+681775877852 - to low
+
+110365987435001 - correct, bug i program :)
+*/
 
