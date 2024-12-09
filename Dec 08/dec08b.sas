@@ -30,7 +30,7 @@ if grid(currx,curry) = grid(searchx,searchy) then do;
 		adotx = currx + 2*distx + distx*nodots;
 		adoty = curry + 2*disty + disty*nodots;
 		if  1 <= adotx <= &gridsize. and  1 <= adoty <= &gridsize. then adot(adotx,adoty) = '#';
-	endrsubmit;
+	end;
     /* mark self as adot too, using % to separate from real adots */
  	adot(currx,curry) = '%';
 *	put currx= curry= searchx= searchy= sqsize= distx= disty= adotx= adoty=;
