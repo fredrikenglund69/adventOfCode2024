@@ -1,5 +1,5 @@
 data indata;
- length row $20000 i a q t lid lidpos done mpos id 8 val $1 idtmp lidtmp part $200;
+ length row $20000 i a q t lid lidpos done mpos id 8 val $200 idtmp lidtmp $200;
 
  infile _infile delimiter='';
  array ids(20000) $200;
@@ -12,7 +12,7 @@ data indata;
  do until (substr(row,i,1) = '');
  	q = input(substr(row,i,1),best.);
 
-	if (i/2) ne int(i/2) then val = put(id,$1.); /* odd numbers of i */
+	if (i/2) ne int(i/2) then val = put(id,best.); /* odd numbers of i */
 	else do;
 		val = '.';
 		id + 1;
@@ -106,4 +106,9 @@ data indata;
  put sum=;
 
 
+run;
+
+data test;
+ set indata;
+ put sum 20.;
 run;
