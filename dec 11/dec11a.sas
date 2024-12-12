@@ -2,8 +2,8 @@ data test(drop=stones: stonesnew:);
 	length row $200 nos nosn num1 num2 8;
 /*	row = '125 17';*/
 	row = '112 1110 163902 0 7656027 83039 9 74';
-	array stones(200000) $200;
-	array stonesnew(200000) $200;
+	array stones(1900000) $20;
+	array stonesnew(1900000) $20;
 
 	/* fill array */
 	i = 1;
@@ -15,7 +15,7 @@ data test(drop=stones: stonesnew:);
 	nos  = i - 1;
 	nosn = 1;
 
-	do blink = 1 to 25;
+	do blink = 1 to 75;
 		do w = 1 to nos;
 			l = length(stones(w));
 
